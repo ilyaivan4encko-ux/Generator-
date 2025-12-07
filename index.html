@@ -1,0 +1,559 @@
+
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Генератор Шишка — Поддержи сайт ⚡</title>
+<meta name="theme-color" content="#0b0f14">
+<style>
+  :root{
+    --bg:#0b0f14;
+    --panel:#0f1720;
+    --muted:#9aa4b2;
+    --accent:#ffd27a;
+    --accent-2:#ff7f50;
+    --good:#7be57b;
+    --danger:#ff6b6b;
+    --glass: rgba(255,255,255,0.02);
+    --radius:14px;
+    --shadow: 0 8px 30px rgba(3,6,12,0.7);
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background: linear-gradient(180deg,#07090c,var(--bg));
+    color:#e8eef6;
+    -webkit-font-smoothing:antialiased;
+    padding:12px;
+  }
+
+  /* Mobile-first container */
+  .app{
+    max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:12px;
+  }
+  header{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .brand{display:flex;gap:10px;align-items:center}
+  .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:900;color:#141414;font-size:24px;box-shadow:var(--shadow)}
+  h1{font-size:16px;margin-bottom:4px}
+  .lead{font-size:12px;color:var(--muted)}
+
+  .panel{
+    background:linear-gradient(180deg, rgba(255,255,255,0.012), rgba(255,255,255,0.01));
+    border-radius:var(--radius);padding:14px;border:1px solid rgba(255,255,255,0.03);box-shadow:var(--shadow);
+  }
+
+  .status{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .stat{background:var(--glass);padding:8px 10px;border-radius:10px;font-weight:700;font-size:14px}
+  .stat small{display:block;font-weight:400;font-size:11px;color:var(--muted)}
+
+  .generator{
+    display:flex;flex-direction:column;gap:10px;align-items:center;text-align:center;
+  }
+  .gen-visual{width:140px;height:140px;border-radius:20px;background:linear-gradient(180deg,#1a2430,#08121a);display:flex;align-items:center;justify-content:center;font-size:40px;box-shadow:0 14px 40px rgba(2,6,23,0.6)}
+  .gen-power{font-size:22px;font-weight:900;margin-top:6px}
+  .generator .small{font-size:12px;color:var(--muted)}
+
+  .controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  button.btn{background:linear-gradient(180deg,#1f8cff,#0060d6);border:none;padding:10px 12px;border-radius:10px;color:white;font-weight:800;cursor:pointer}
+  button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+
+  .game-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .resource-list{display:flex;gap:8px;overflow:auto;padding:6px}
+  .res-card{min-width:120px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);text-align:center}
+  .res-card button{width:100%;margin-top:8px}
+
+  .shop-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  .shop-item{background:rgba(255,255,255,0.01);padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.02);font-size:13px}
+  .shop-item .title{font-weight:800;margin-bottom:6px}
+  .upgrade-level{font-size:12px;color:var(--muted);margin-top:6px}
+
+  .footer{display:flex;gap:8px;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted)}
+
+  /* Modal */
+  .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(2,6,12,0.6);z-index:60;padding:20px}
+  .modal .panel{max-width:520px;width:100%}
+
+  /* Responsive tweaks */
+  @media(min-width:800px){
+    .app{padding:24px}
+    .gen-visual{width:200px;height:200px;font-size:56px;border-radius:20px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="brand">
+      <div class="logo">Ш</div>
+      <div>
+        <h1>Генератор Шишка</h1>
+        <div class="lead">Лор: этот генератор питает сайт электричеством — поддержи его работу!</div>
+      </div>
+    </div>
+    <div style="text-align:right">
+      <div class="muted" style="font-size:12px;color:var(--muted)">Уровень</div>
+      <div id="levelDisplay" style="font-weight:900">1</div>
+    </div>
+  </header>
+
+  <section class="panel generator" id="generatorPanel" aria-live="polite">
+    <div class="gen-visual" id="genVisual">🔌</div>
+    <div class="gen-power" id="powerDisplay">Энергия: 0%</div>
+    <div class="small" id="genLore">Генератор на мусорной свалке. Собирать горящие ресурсы, чтобы вырабатывать энергию для сайта.</div>
+
+    <div class="game-row">
+      <div class="status">
+        <div class="stat">Баланс: <span id="coins">0</span> <small>шишка-коинов</small></div>
+        <div class="stat">Топливо: <span id="fuel">0</span> <small>ед.</small></div>
+        <div class="stat">Нагрузка: <span id="load">0</span>% <small>устойчивость</small></div>
+      </div>
+    </div>
+
+    <div class="controls" style="margin-top:6px">
+      <button class="btn" id="collectBtn">Клик — поиск горящего мусора</button>
+      <button class="btn ghost" id="autoBtn">Купить автосбор (логистика)</button>
+      <button class="ghost" id="shopBtn">Магазин</button>
+      <button class="ghost" id="saveBtn">Сохранить</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div style="font-weight:900">Ресурсы</div>
+      <div class="muted" id="resourceHint">Мусорная свалка: шанс 20% найти горящий мусор за клик</div>
+    </div>
+    <div class="resource-list" id="resourceList">
+      <!-- resource cards appended here -->
+    </div>
+  </section>
+
+  <section class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div style="font-weight:900">Магазин — улучшения</div>
+      <div class="muted">Пять категорий по 5 уровней</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+      <button class="btn ghost" data-shop="generator">Генератор</button>
+      <button class="btn ghost" data-shop="wiring">Проводка</button>
+      <button class="btn ghost" data-shop="logistics">Логистика</button>
+      <button class="btn ghost" data-shop="fuel">Концентрат топлива</button>
+      <button class="btn ghost" data-shop="misc">Разное</button>
+    </div>
+
+    <div id="shopGrid" class="shop-grid">
+      <!-- items injected here -->
+    </div>
+  </section>
+
+  <div class="footer">
+    <div class="muted">Сохранение прогресса: локально в браузере</div>
+    <div style="display:flex;gap:8px">
+      <button class="ghost" id="resetBtn">Сбросить</button>
+      <button class="ghost" id="exportBtn">Экспорт</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal -->
+<div id="modal" class="modal" style="display:none" role="dialog" aria-modal="true">
+  <div class="panel">
+    <div id="modalContent"></div>
+    <div style="display:flex;justify-content:flex-end;margin-top:12px;gap:8px">
+      <button class="ghost" id="modalClose">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ====== Mobile-first generator game
+   - 5 world levels:
+     1: мусорка (20% шанс горящего мусора при клике)
+     2: лес (5 кликов -> бревно)
+     3: шахта (10 кликов -> уголь)
+     4: нефтепереработка (нужен уголь для создания бензина)
+     5: финал: "ой обманул" — генератор ломается
+   - 5 upgrade categories: generator, wiring, logistics, fuel, misc
+   - each category has 5 levels, buyable in shop
+   - progress saved to localStorage
+*/
+
+const STORAGE = 'shishka_generator_v1';
+let state = {
+  level:1,
+  energy:0,        // percent 0-100
+  fuel:0,          // generic fuel units
+  coins:200,
+  load:0,
+  upgrades: {
+    generator:0, wiring:0, logistics:0, fuel:0, misc:0
+  },
+  resources: { trash:0, wood:0, coal:0, oil:0, fuelGas:0 },
+  clicks: { wood:0, coal:0 },
+  autos: { logistics:false },
+  history: []
+};
+
+function load(){ try{ const raw = localStorage.getItem(STORAGE); if(raw) state = JSON.parse(raw); }catch(e){ console.warn(e); } }
+function save(){ localStorage.setItem(STORAGE, JSON.stringify(state)); updateUI(); }
+
+load();
+
+/* ===== Game constants and definitions ===== */
+const TRASH_ITEMS = ['стопка старых книг','старая одежда','картонная коробка','сгоревший матрас','высохшая газета'];
+const SHOP = {
+  generator: [
+    {title:'Поршень Mk.I', desc:'+5% эффективности генерации', cost:100},
+    {title:'Котёл усиленный', desc:'+10% эффективности', cost:250},
+    {title:'Турбина', desc:'+15% эффективности', cost:500},
+    {title:'Инжектор', desc:'+25% эффективности', cost:1200},
+    {title:'Квантовый модуль', desc:'+50% эффективности', cost:4000},
+  ],
+  wiring: [
+    {title:'Изоляция Bronze', desc:'-2% потерь', cost:80},
+    {title:'Провод медный', desc:'-4% потерь', cost:220},
+    {title:'Шунт', desc:'-7% потерь', cost:480},
+    {title:'Оптоволокно', desc:'-12% потерь', cost:1100},
+    {title:'Суперпроводник', desc:'-25% потерь', cost:3500},
+  ],
+  logistics: [
+    {title:'Тележка', desc:'+автосбор мусора (медл.)', cost:120},
+    {title:'Мотопила', desc:'+скорость рубки', cost:300},
+    {title:'Экскаватор', desc:'+скорость шахты', cost:700},
+    {title:'Транспортная сеть', desc:'+скорость доставки', cost:1500},
+    {title:'Робот‑курьер', desc:'полностью автосбор', cost:4200},
+  ],
+  fuel: [
+    {title:'Примесь A', desc:'+5% ценности топлива', cost:90},
+    {title:'Катализатор', desc:'+10% ценности', cost:240},
+    {title:'Суперконцентрат', desc:'+20% ценности', cost:600},
+    {title:'Сжато‑порошок', desc:'+35% ценности', cost:1400},
+    {title:'Форма энерджи', desc:'+70% ценности', cost:3800},
+  ],
+  misc: [
+    {title:'Ящик инструментов', desc:'+маленький бонус к кликам', cost:50},
+    {title:'Карта местности', desc:'+шанс найти редкий мусор', cost:140},
+    {title:'Фонарь', desc:'+ночная эффективность', cost:320},
+    {title:'Кот в коробке', desc:'повышает мораль (вкусно)', cost:900},
+    {title:'Тотем удачи', desc:'+шанс дропа ресурсов', cost:2600},
+  ]
+};
+
+/* ===== Helpers ===== */
+const $ = id => document.getElementById(id);
+function format(n){ return Math.floor(n); }
+function rand(n){ return Math.random()*n; }
+function chance(p){ return Math.random() < p; }
+
+/* ===== UI building ===== */
+function renderResources(){
+  const list = $('resourceList'); list.innerHTML='';
+  // Trash card
+  const t = document.createElement('div'); t.className='res-card';
+  t.innerHTML = `<div style="font-weight:900">Мусор</div><div class="muted" style="font-size:12px">Горючие находки</div><div style="font-size:18px;font-weight:900;margin-top:6px" id="trashCount">${state.resources.trash}</div><button class="btn ghost" id="burnTrash">Сжечь мусор → топливо</button>`;
+  list.appendChild(t);
+  // Wood card (unlocked on level 2)
+  const w = document.createElement('div'); w.className='res-card';
+  w.innerHTML = `<div style="font-weight:900">Дерево</div><div class="muted" style="font-size:12px">5 кликов = 1 бревно</div><div style="font-size:18px;font-weight:900;margin-top:6px" id="woodCount">${state.resources.wood}</div><button class="btn ghost" id="chopWood">Рубить дерево</button>`;
+  list.appendChild(w);
+  // Coal card (level 3)
+  const c = document.createElement('div'); c.className='res-card';
+  c.innerHTML = `<div style="font-weight:900">Уголь</div><div class="muted" style="font-size:12px">10 кликов = 1 уголь</div><div style="font-size:18px;font-weight:900;margin-top:6px" id="coalCount">${state.resources.coal}</div><button class="btn ghost" id="mineCoal">Копать</button>`;
+  list.appendChild(c);
+  // Oil card (level 4)
+  const o = document.createElement('div'); o.className='res-card';
+  o.innerHTML = `<div style="font-weight:900">Нефть</div><div class="muted" style="font-size:12px">Переработка в бензин требует угля</div><div style="font-size:18px;font-weight:900;margin-top:6px" id="oilCount">${state.resources.oil}</div><button class="btn ghost" id="pumpOil">Добыть нефть</button>`;
+  list.appendChild(o);
+  // Fuel (gasoline)
+  const f = document.createElement('div'); f.className='res-card';
+  f.innerHTML = `<div style="font-weight:900">Бензин</div><div class="muted" style="font-size:12px">Используется для генерации</div><div style="font-size:18px;font-weight:900;margin-top:6px" id="fuelCount">${state.resources.fuelGas}</div><button class="btn ghost" id="refineBtn">Переработать → бензин</button>`;
+  list.appendChild(f);
+
+  // attach buttons
+  $('burnTrash').addEventListener('click', ()=>{
+    if (state.resources.trash <=0){ toast('Нет мусора'); return; }
+    const efficiency = 1 + state.upgrades.fuel*0.05;
+    const fuelGain = Math.max(1, Math.floor(state.resources.trash * 0.6 * efficiency));
+    state.resources.trash = 0;
+    state.resources.fuelGas += fuelGain;
+    state.history.push({type:'burnTrash', fuelGain, time:Date.now()});
+    toast(`Сожжено мусора → +${fuelGain} ед. топлива`);
+    updateUI(); save();
+  });
+  $('chopWood').addEventListener('click', ()=>{
+    if (state.level < 2){ toast('Лес не доступен'); return; }
+    state.clicks.wood++;
+    const need = Math.max(1, 5 - Math.floor(state.upgrades.logistics*0.6));
+    if (state.clicks.wood >= need){
+      state.resources.wood += 1 + Math.floor(state.upgrades.logistics*0.2);
+      state.clicks.wood = 0;
+      toast('Получено 1 бревно');
+    } else {
+      toast(`Рубка... (${state.clicks.wood}/${need})`);
+    }
+    updateUI(); save();
+  });
+  $('mineCoal').addEventListener('click', ()=>{
+    if (state.level < 3){ toast('Шахта не доступна'); return; }
+    state.clicks.coal++;
+    const need = Math.max(3, 10 - Math.floor(state.upgrades.logistics*1.2));
+    if (state.clicks.coal >= need){
+      state.resources.coal += 1 + Math.floor(state.upgrades.logistics*0.2);
+      state.clicks.coal = 0;
+      toast('Добыт уголь');
+    } else {
+      toast(`Копаем... (${state.clicks.coal}/${need})`);
+    }
+    updateUI(); save();
+  });
+  $('pumpOil').addEventListener('click', ()=>{
+    if (state.level < 4){ toast('Нефтеколонна не доступна'); return; }
+    // oil requires some coal to pump? We'll allow pumping but with small randomness
+    if (state.resources.coal <=0){ toast('Нужен уголь для питания насоса'); return; }
+    state.resources.coal -= 1;
+    const gained = 1 + Math.floor(state.upgrades.logistics*0.2);
+    state.resources.oil += gained;
+    toast(`Добыто нефти +${gained} (украдено 1 уголь на питание)`);
+    updateUI(); save();
+  });
+  $('refineBtn').addEventListener('click', ()=>{
+    if (state.resources.oil <=0){ toast('Нет нефти'); return; }
+    const needCoal = Math.max(1, 2 - Math.floor(state.upgrades.fuel*0.2));
+    if (state.resources.coal < needCoal){ toast(`Для переработки нужен уголь x${needCoal}`); return; }
+    state.resources.coal -= needCoal;
+    const efficiency = 1 + state.upgrades.fuel*0.08 + state.upgrades.generator*0.02;
+    const out = Math.max(1, Math.floor(state.resources.oil * 0.8 * efficiency));
+    state.resources.oil = 0;
+    state.resources.fuelGas += out;
+    toast(`Переработано нефти → бензин +${out}`);
+    updateUI(); save();
+  });
+}
+
+function renderShop(category='generator'){
+  const grid = $('shopGrid'); grid.innerHTML='';
+  const items = SHOP[category] || [];
+  items.forEach((it, idx)=>{
+    const lvl = state.upgrades[category] || 0;
+    const unlocked = idx < lvl; // previous levels bought
+    const purchasable = idx === lvl; // buy next
+    const div = document.createElement('div'); div.className='shop-item';
+    div.innerHTML = `<div class="title">${it.title}</div><div class="muted">${it.desc}</div><div class="upgrade-level">Уровень: ${lvl}/5</div><div style="margin-top:8px"><strong>Цена: ${it.cost}</strong></div>`;
+    const btn = document.createElement('button'); btn.className='btn ghost'; btn.style.marginTop='8px';
+    if (purchasable){ btn.textContent='Купить'; btn.addEventListener('click', ()=> buyUpgrade(category, idx)); }
+    else if (unlocked){ btn.textContent='Установлено'; btn.disabled=true; }
+    else { btn.textContent='Сначала предыдущий'; btn.disabled=true; }
+    div.appendChild(btn);
+    grid.appendChild(div);
+  });
+}
+
+function buyUpgrade(cat, idx){
+  const item = SHOP[cat][idx];
+  if (state.coins < item.cost){ toast('Недостаточно шишка-коинов'); return; }
+  // purchase
+  state.coins -= item.cost;
+  state.upgrades[cat] = (state.upgrades[cat] || 0) + 1;
+  state.history.push({type:'upgrade', cat, title:item.title, cost:item.cost, time:Date.now()});
+  toast(`Куплено: ${item.title}`);
+  applyUpgradeEffects(cat);
+  renderShop(cat);
+  updateUI(); save();
+}
+
+/* ===== Game loop and mechanics ===== */
+function collectClick(){
+  // main click on trash level (level1)
+  if (state.level === 5){
+    // final twist: break
+    showModal(`<h3>Ой, обманул — генератор сломался 🤖💥</h3><p>Ну ты и попался — игра закончена. Спасибо за тест!</p>`);
+    return;
+  }
+  // chance to find burning trash. base 20% plus bonuses
+  const base = 0.20;
+  const bonus = (state.upgrades.misc * 0.02) + (state.upgrades.logistics * 0.03);
+  const chanceFind = Math.min(0.9, base + bonus);
+  if (chance(chanceFind)){
+    // find some trash piece
+    const found = TRASH_ITEMS[Math.floor(Math.random()*TRASH_ITEMS.length)];
+    const amount = 1 + Math.floor(state.upgrades.generator*0.1);
+    state.resources.trash += amount;
+    state.history.push({type:'find', item:found, amount, time:Date.now()});
+    toast(`Найдено: ${found} (+${amount} мусора)`);
+  } else {
+    toast('Пусто...');
+  }
+  // progression: if enough fuel produced, increase energy and maybe level up
+  produceEnergyFromFuel();
+  // autos
+  if (state.autos.logistics || state.upgrades.logistics >= 5){
+    // small auto collection bonus
+    const autoChance = 0.15 + state.upgrades.logistics*0.03;
+    if (chance(autoChance)){
+      state.resources.trash += 1 + Math.floor(state.upgrades.logistics*0.1);
+      toast('Логистика привезла немного мусора');
+    }
+  }
+  updateUI(); save();
+}
+
+function produceEnergyFromFuel(){
+  // consume fuelGas slowly to produce 'energy'
+  const baseProduce = 2 + state.upgrades.generator*1.5; // per tick on click
+  const consume = Math.max(0, Math.floor(baseProduce * 0.4));
+  if (state.resources.fuelGas >= consume && consume>0){
+    state.resources.fuelGas -= consume;
+    const gain = baseProduce * (1 + state.upgrades.fuel*0.06);
+    state.energy = Math.min(100, state.energy + gain*0.8);
+    state.load = Math.min(100, state.load + Math.floor(state.upgrades.wiring* -1 + 1));
+  } else if (state.resources.trash > 0){
+    // fallback: burn trash on the fly
+    state.resources.trash = Math.max(0, state.resources.trash-1);
+    state.energy = Math.min(100, state.energy + 6);
+  } else {
+    // nothing to burn: energy decays
+    state.energy = Math.max(0, state.energy - 2 - state.upgrades.wiring*0.4);
+  }
+  // level up conditions
+  if (state.energy >= 100){
+    // progress to next level if not max
+    if (state.level < 5){
+      state.level++;
+      state.energy = 30; // reset a bit
+      toast(`Уровень достигнут! Открылся новый регион: ${regionName(state.level)}`);
+      // reveal new region text
+      $('genLore').textContent = loreForLevel(state.level);
+      // if reached level 5 -> final
+      if (state.level === 5){
+        showModal(`<h3>Ой, обманул — генератор сломался 🤖💥</h3><p>Похоже, генератор вышел из строя при переходе на пятый уровень...</p>`);
+      }
+    } else {
+      // at max level, cap
+      state.energy = 100;
+    }
+  }
+}
+
+function regionName(lvl){
+  return ['Мусорка','Лес','Шахта','Нефтепромысел','Финал'][lvl-1] || 'Неизвестно';
+}
+function loreForLevel(lvl){
+  return {
+    1: 'Генератор стоит на свалке — поддерживает сайт, используя найденный горящий мусор. Собирай и сжигай.',
+    2: 'Ты добрался до леса — теперь можно добывать дерево. Береги лес, но выживание сайта важнее.',
+    3: 'Шахтёрские тоннели открыты — копай уголь, он мощнее мусора и дерева.',
+    4: 'Нефтеколонна активирована — переработай нефть в бензин, но учти: для переработки нужен уголь.',
+    5: '...кажется это не конец. Ой, обманул — генератор сломался!'
+  }[lvl] || '';
+}
+
+/* ===== Shop UI wiring ===== */
+document.querySelectorAll('[data-shop]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const cat = btn.dataset.shop;
+    renderShop(cat);
+  });
+});
+$('shopBtn').addEventListener('click', ()=>{ renderShop('generator'); showModal($('.panel').length); });
+
+// top buttons
+$('collectBtn').addEventListener('click', collectClick);
+$('autoBtn').addEventListener('click', ()=>{
+  // buy simple autos: cost scales
+  const cost = 400 + state.upgrades.logistics*200;
+  if (state.coins < cost){ toast('Нужны шишка-коины: ' + cost); return; }
+  state.coins -= cost;
+  state.autos.logistics = true;
+  toast('Куплен автосбор логистики');
+  updateUI(); save();
+});
+$('saveBtn').addEventListener('click', ()=>{ save(); toast('Сохранено') });
+$('resetBtn').addEventListener('click', ()=>{ if (confirm('Сбросить прогресс?')){ localStorage.removeItem(STORAGE); location.reload(); } });
+$('exportBtn').addEventListener('click', ()=>{
+  const data = JSON.stringify(state, null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='shishka_generator_save.json'; a.click();
+  URL.revokeObjectURL(url);
+});
+
+/* ===== Apply passive upgrade effects ===== */
+function applyUpgradeEffects(cat){
+  // simple immediate effects handled through state usage in other functions
+  // but we can award coins or adjust values if needed
+  if (cat==='generator'){
+    // small immediate energy boost
+    state.energy = Math.min(100, state.energy + 8 + state.upgrades.generator*2);
+  }
+  if (cat==='wiring'){
+    // wiring reduces energy decay -> reflected in produceEnergyFromFuel
+  }
+  if (cat==='logistics'){
+    // logistics improves collection speeds; implemented in chop/mine logic
+  }
+  if (cat==='fuel'){
+    // increases fuel output in refining/burning; handled in formulas
+  }
+  if (cat==='misc'){
+    // misc can increase find chance; handled
+  }
+  updateUI();
+}
+
+/* ===== Toasts & Modal ===== */
+let toastTimer = null;
+function toast(msg, t=1400){
+  // small on-screen toast using modal area
+  const el = document.createElement('div');
+  el.style.position='fixed'; el.style.left='50%'; el.style.bottom='14px';
+  el.style.transform='translateX(-50%)'; el.style.background='#06111a'; el.style.padding='10px 14px'; el.style.borderRadius='10px';
+  el.style.border='1px solid rgba(255,255,255,0.03)'; el.style.zIndex=9999; el.style.boxShadow='0 8px 30px rgba(0,0,0,0.6)';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(()=> el.remove(), t);
+}
+
+function showModal(html){
+  $('modalContent').innerHTML = html;
+  $('modal').style.display = 'flex';
+}
+$('modalClose').addEventListener('click', ()=> $('modal').style.display='none');
+
+/* ===== Update UI ===== */
+function updateUI(){
+  $('coins').textContent = format(state.coins);
+  $('fuel').textContent = format(state.resources.fuelGas + state.resources.trash*0.2);
+  $('load').textContent = format(state.load);
+  $('powerDisplay').textContent = `Энергия: ${format(state.energy)}%`;
+  $('levelDisplay').textContent = state.level;
+  // generator visual tint
+  const gv = $('genVisual');
+  if (state.energy>66) gv.textContent='🔆'; else if (state.energy>33) gv.textContent='🔌'; else gv.textContent='⚡';
+  // resource counts
+  const tc = $('trashCount'); if (tc) tc.textContent = state.resources.trash;
+  const wc = $('woodCount'); if (wc) wc.textContent = state.resources.wood;
+  const cc = $('coalCount'); if (cc) cc.textContent = state.resources.coal;
+  const oc = $('oilCount'); if (oc) oc.textContent = state.resources.oil;
+  const fc = $('fuelCount'); if (fc) fc.textContent = state.resources.fuelGas;
+  // shop initial render
+  renderShop('generator');
+}
+
+/* ===== Initial render and autosaving ===== */
+renderResources();
+updateUI();
+save();
+
+// autosave every 10s
+setInterval(()=> save(), 10000);
+
+/* ===== Unlocking logic for levels based on energy thresholds ===== */
+// Level 1 -> 2 at energy >=100
+// Additional UI hint changes on level change handled in produceEnergyFromFuel()
+
+</script>
+</body>
+</html>
